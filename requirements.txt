@@ -1,6 +1,6 @@
-fastapi
-uvicorn[standard]
-psycopg2-binary
-langchain-google-genai
-python-dotenv
-pydantic
+fastapi==0.104.1
+uvicorn[standard]==0.30.6
+psycopg2-binary==2.9.9
+langchain-google-genai==1.0.10
+python-dotenv==1.0.1
+pydantic==1.10.12
