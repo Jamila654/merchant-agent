@@ -1,4 +1,3 @@
-# app.py
 import os
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -11,7 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title="Merchant Chat")
-
+os.environ["GOOGLE_API_KEY"] = os.getenv("GOOGLE_API_KEY")
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0.4)
 
 class Message(BaseModel):
@@ -31,8 +30,8 @@ def get_merchant(merchant_id: int):
         conn.close()
         if row:
             return {"name": row[0], "product": row[1], "price": float(row[2])}
-    except:
-        pass
+    except Exception as e:
+        print("DB error:", e)
     return None
 
 @app.get("/")
@@ -43,7 +42,7 @@ def home():
 def chat(request: ChatRequest):
     data = get_merchant(request.merchant_id)
     if not data:
-        raise HTTPException(404, "Merchant not found (ID 1-200)")
+        raise HTTPException(status_code=404, detail="Merchant not found (ID 1-200)")
 
     system_prompt = f"""You are an expert retail price analyst with 15 years of experience.
 You are analyzing exactly one product:
@@ -69,7 +68,10 @@ Answer naturally and conversationally."""
         else:
             messages.append(SystemMessage(content=msg.content))
 
-    response = llm.invoke(messages)
+    try:
+        response = llm.invoke(messages)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"LLM error: {str(e)}")
     
     return {
         "merchant": f"{data['name']} — {data['product']} — ${data['price']:.2f}",
