@@ -4,3 +4,4 @@ psycopg2-binary==2.9.9
 langchain-google-genai==1.0.10
 python-dotenv==1.0.1
 pydantic==2.12.5
+pydantic-core==2.12.5
